@@ -12,7 +12,9 @@ def geraListasDeAcordoComTags():
         tag = audioFile.tag
         ##100 pra cima é rápido
         #if(tag.genre is not None and tag.genre.name == "Xote"):
-        if(tag.bpm > 100):
+        if(tag.title == "silencio"):
+            continue
+        elif(tag.bpm > 100):
             listaMusicasRapidas.append(f);
         else:
             listaMusicasLentas.append(f)
@@ -38,6 +40,12 @@ def criaDiretorioDestino(nomePlaylist):
         os.mkdir(nomePlaylist)
     return
 
+def insereSilencio(indiceMusicaAtual, indiceBlocoAtual):
+    nomeArquivoSilencioDestino = (str(indiceMusicaAtual).zfill(2) +
+            indiceBlocoAtual + " silencio.mp3")
+    shutil.copy("Forró/" + "silencio.mp3", nomePlaylist +"/" + nomeArquivoSilencioDestino)
+        
+
 def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
     indiceMusicaAtual = 1;
     indiceBlocoAtual = 'A';
@@ -62,11 +70,13 @@ def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
             indiceMusicaAtual+= 1;
         musicaRapida =  not musicaRapida;
         indiceBlocoAtual = chr(ord(indiceBlocoAtual) + 1);
+        insereSilencio(indiceMusicaAtual, indiceBlocoAtual)
+        indiceMusicaAtual+= 1;
     return
 
 
 listaMusicasRapidas, listaMusicasLentas = geraListasDeAcordoComTags()
-nomePlaylist="playlistMaio"
+nomePlaylist="playlist_destino"
 criaDiretorioDestino(nomePlaylist)
 geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist)
 
