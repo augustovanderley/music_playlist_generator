@@ -5,20 +5,24 @@ import shutil
 import re
 
 def geraListasDeAcordoComTags():
-    listaMusicasRapidas = [];
     listaMusicasLentas = [];
+    listaMusicasMedias = [];
+    listaMusicasRapidas = [];
     for f in os.listdir("Forró"):
         audioFile = eyed3.load("Forró/" + f)
         tag = audioFile.tag
         ##100 pra cima é rápido
         #if(tag.genre is not None and tag.genre.name == "Xote"):
-        if(tag.title == "silencio"):
+
+        if(tag.title is not None and tag.title == "silencio"):
             continue
-        elif(tag.bpm > 100):
-            listaMusicasRapidas.append(f);
-        else:
+        elif(tag.bpm is not None and tag.bpm < 100 and tag.genre is not None and tag.genre.name == "Xote"):
             listaMusicasLentas.append(f)
-    return listaMusicasRapidas, listaMusicasLentas
+        elif(tag.bpm is not None and tag.bpm < 100):
+            listaMusicasMedias.append(f)
+        elif(tag.bpm is not None and tag.bpm >= 100):
+            listaMusicasRapidas.append(f);
+    return listaMusicasLentas, listaMusicasMedias, listaMusicasRapidas
 
 def retornaNomeArquivoNoPadrao(indiceMusicaAtual, indiceBlocoAtual, musicaAleatoria ):
     audioFile = eyed3.load("Forró/" + musicaAleatoria)
@@ -44,43 +48,80 @@ def insereSilencio(indiceMusicaAtual, indiceBlocoAtual):
     nomeArquivoSilencioDestino = (str(indiceBlocoAtual).zfill(2) +
             indiceMusicaAtual + " silencio.mp3")
     shutil.copy("Forró/" + "silencio.mp3", nomePlaylist +"/" + nomeArquivoSilencioDestino)
-        
 
-def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
+def atualizaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido):
+    if(estiloBlocoLento == True):
+        estiloBlocoLento = False;
+        estiloBlocoMedio = True;
+        estiloBlocoRapido = False;
+        return estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido
+    elif (estiloBlocoMedio == True):
+        estiloBlocoLento = False;
+        estiloBlocoMedio = False;
+        estiloBlocoRapido = True;
+        return estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido
+    elif(estiloBlocoRapido == True):
+        estiloBlocoLento = True;
+        estiloBlocoMedio = False;
+        estiloBlocoRapido = False;
+        return estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido
+
+def verificaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido):
+    if(estiloBlocoLento == True):
+        return 'Lento'
+    if(estiloBlocoMedio == True):
+        return 'Medio'
+    if(estiloBlocoRapido == True):
+        return 'Rapido'
+
+def geraPlaylistDestino(listaMusicasLentas, listaMusicasMedias, listaMusicasRapidas, nomePlaylist):
     indiceMusicaAtual = 'A';
     indiceBlocoAtual = 1;
-    random.shuffle(listaMusicasRapidas)
     random.shuffle(listaMusicasLentas)
-    musicaRapida = True;
+    random.shuffle(listaMusicasMedias)
+    random.shuffle(listaMusicasRapidas)
+    estiloBlocoLento = False;
+    estiloBlocoMedio = True;
+    estiloBlocoRapido = False;
+    tamanhoBloco = 3
     for x in range(0,3):
         insereSilencio(indiceMusicaAtual, indiceBlocoAtual)
-        for y in range(0,2):
+        if(verificaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido) == 'Lento'):
+            tamanhoBloco = 2;
+        else:
+            tamanhoBloco = 3;
+        for y in range(0,tamanhoBloco):
             indiceMusicaAtual = chr(ord(indiceMusicaAtual) + 1);
-            if(musicaRapida == True):
+            if(verificaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido) == 'Rapido' ):
                 if(listaMusicasRapidas):
                     musicaAleatoria = listaMusicasRapidas.pop();
                 else:
                     musicaAleatoria = None;
-            else:
+            elif(verificaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido) == 'Lento'):
                 if(listaMusicasLentas):
                     musicaAleatoria = listaMusicasLentas.pop();
+                else:
+                    musicaAleatoria  = None;
+            elif(verificaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido) == 'Medio' ):
+                if(listaMusicasMedias):
+                    musicaAleatoria = listaMusicasMedias.pop();
                 else:
                     musicaAleatoria  = None;
             if(musicaAleatoria is not None):
                 nomeMusicaASerAdicionada = retornaNomeArquivoNoPadrao(indiceMusicaAtual, indiceBlocoAtual, musicaAleatoria)
                 shutil.copy("Forró/" + musicaAleatoria, nomePlaylist +"/" + nomeMusicaASerAdicionada)
             
-        musicaRapida =  not musicaRapida;
+        estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido = atualizaEstiloBloco(estiloBlocoLento, estiloBlocoMedio, estiloBlocoRapido)
 
         indiceBlocoAtual +=1
         indiceMusicaAtual = 'A';
     return
 
 
-listaMusicasRapidas, listaMusicasLentas = geraListasDeAcordoComTags()
+listaMusicasLentas, listaMusicasMedias, listaMusicasRapidas = geraListasDeAcordoComTags()
 nomePlaylist="playlist_destino"
 criaDiretorioDestino(nomePlaylist)
-geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist)
+geraPlaylistDestino(listaMusicasLentas, listaMusicasMedias, listaMusicasRapidas, nomePlaylist)
 
 
 #usar random.sample(listaMusicasRapidas, k) ou shuffle + pop
