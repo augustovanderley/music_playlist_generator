@@ -53,7 +53,9 @@ def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
     random.shuffle(listaMusicasLentas)
     musicaRapida = True;
     for x in range(0,3):
+        insereSilencio(indiceMusicaAtual, indiceBlocoAtual)
         for y in range(0,2):
+            indiceMusicaAtual = chr(ord(indiceMusicaAtual) + 1);
             if(musicaRapida == True):
                 if(listaMusicasRapidas):
                     musicaAleatoria = listaMusicasRapidas.pop();
@@ -67,9 +69,9 @@ def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
             if(musicaAleatoria is not None):
                 nomeMusicaASerAdicionada = retornaNomeArquivoNoPadrao(indiceMusicaAtual, indiceBlocoAtual, musicaAleatoria)
                 shutil.copy("Forró/" + musicaAleatoria, nomePlaylist +"/" + nomeMusicaASerAdicionada)
-            indiceMusicaAtual = chr(ord(indiceMusicaAtual) + 1);
+            
         musicaRapida =  not musicaRapida;
-        insereSilencio(indiceMusicaAtual, indiceBlocoAtual)
+
         indiceBlocoAtual +=1
         indiceMusicaAtual = 'A';
     return
