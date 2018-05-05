@@ -25,11 +25,11 @@ def retornaNomeArquivoNoPadrao(indiceMusicaAtual, indiceBlocoAtual, musicaAleato
     tag = audioFile.tag
  
     if(tag.genre is None):
-        return (str(indiceMusicaAtual).zfill(2) +
-            indiceBlocoAtual + " (" + str(tag.bpm).zfill(3) + "bpm)" +
+        return (str(indiceBlocoAtual).zfill(2) +
+            indiceMusicaAtual + " (" + str(tag.bpm).zfill(3) + "bpm)" +
             tag.artist.replace("/", ",")+ " - " + tag.title +".mp3" )
-    return (str(indiceMusicaAtual).zfill(2) +
-            indiceBlocoAtual + " (" + str(tag.bpm).zfill(3) + "bpm)(" + tag.genre.name +") " +
+    return (str(indiceBlocoAtual).zfill(2) +
+            indiceMusicaAtual + " (" + str(tag.bpm).zfill(3) + "bpm)(" + tag.genre.name +") " +
             tag.artist.replace("/", ",")+ " - " + tag.title +".mp3" )
    
 def criaDiretorioDestino(nomePlaylist):
@@ -41,14 +41,14 @@ def criaDiretorioDestino(nomePlaylist):
     return
 
 def insereSilencio(indiceMusicaAtual, indiceBlocoAtual):
-    nomeArquivoSilencioDestino = (str(indiceMusicaAtual).zfill(2) +
-            indiceBlocoAtual + " silencio.mp3")
+    nomeArquivoSilencioDestino = (str(indiceBlocoAtual).zfill(2) +
+            indiceMusicaAtual + " silencio.mp3")
     shutil.copy("Forró/" + "silencio.mp3", nomePlaylist +"/" + nomeArquivoSilencioDestino)
         
 
 def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
-    indiceMusicaAtual = 1;
-    indiceBlocoAtual = 'A';
+    indiceMusicaAtual = 'A';
+    indiceBlocoAtual = 1;
     random.shuffle(listaMusicasRapidas)
     random.shuffle(listaMusicasLentas)
     musicaRapida = True;
@@ -67,11 +67,11 @@ def geraPlaylistDestino(listaMusicasRapidas, listaMusicasLentas, nomePlaylist):
             if(musicaAleatoria is not None):
                 nomeMusicaASerAdicionada = retornaNomeArquivoNoPadrao(indiceMusicaAtual, indiceBlocoAtual, musicaAleatoria)
                 shutil.copy("Forró/" + musicaAleatoria, nomePlaylist +"/" + nomeMusicaASerAdicionada)
-            indiceMusicaAtual+= 1;
+            indiceMusicaAtual = chr(ord(indiceMusicaAtual) + 1);
         musicaRapida =  not musicaRapida;
-        indiceBlocoAtual = chr(ord(indiceBlocoAtual) + 1);
         insereSilencio(indiceMusicaAtual, indiceBlocoAtual)
-        indiceMusicaAtual+= 1;
+        indiceBlocoAtual +=1
+        indiceMusicaAtual = 'A';
     return
 
 
